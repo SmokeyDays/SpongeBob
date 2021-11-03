@@ -32,6 +32,6 @@
 *.app
 
 /build
-/deps/googletest
-/deps/jsoncpp
-/deps/libevent
+# /deps/googletest
+# /deps/jsoncpp
+# /deps/libevent
