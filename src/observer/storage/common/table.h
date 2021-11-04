@@ -43,7 +43,7 @@ public:
    */
   RC create(const char *name, const char *base_dir, int attribute_count, const AttrInfo attributes[]);
 
-  RC drop();
+  RC drop(const char *name, const char *base_dir);
 
   /**
    * 打开一个表

@@ -78,7 +78,7 @@ RC Db::drop_table(const char *table_name){
 
   std::string table_file_path = table_meta_file(path_.c_str(), table_name);
   Table *table = new Table();
-  rc = table->drop();
+  rc = table->drop(table_name, path_.c_str());
   if (rc != RC::SUCCESS) {
     delete table;
     return rc;

@@ -113,7 +113,7 @@ RC Table::create(const char *name, const char *base_dir, int attribute_count, co
   return rc;
 }
 
-RC Table::drop(){
+RC Table::drop(const char *name, const char *base_dir){
 
 }
 
