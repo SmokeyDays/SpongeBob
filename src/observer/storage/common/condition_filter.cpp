@@ -20,11 +20,6 @@ See the Mulan PSL v2 for more details. */
 
 using namespace common;
 
-pid_t gettid(void)
-{
-  return syscall(__NR_gettid);
-}
-
 ConditionFilter::~ConditionFilter()
 {
 }
