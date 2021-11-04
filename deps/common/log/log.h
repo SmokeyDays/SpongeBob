@@ -199,11 +199,6 @@ namespace common
     }                                                             \
   } while (0)
 
-  pid_t gettid(void)
-  {
-    return syscall(__NR_gettid);
-  }
-
 #define LOG_DEFAULT(fmt, ...) \
   LOG_OUTPUT(common::g_log->get_log_level(), fmt, ##__VA_ARGS__)
 #define LOG_PANIC(fmt, ...) LOG_OUTPUT(common::LOG_LEVEL_PANIC, fmt, ##__VA_ARGS__)
