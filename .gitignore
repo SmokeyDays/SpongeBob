@@ -32,6 +32,5 @@
 *.app
 
 /build
-# /deps/googletest
-# /deps/jsoncpp
-# /deps/libevent
+/.vscode
+/deps
