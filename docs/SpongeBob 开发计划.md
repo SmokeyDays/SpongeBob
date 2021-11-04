@@ -1,4 +1,4 @@
-# SpongeBob 开发计划
+# Sponge 开发计划
 
 ## 需求
 
@@ -166,6 +166,9 @@ select t.id, t.name, avg(t.score),avg(t2.age) from t,t2 where t.id=t2.id group b
 
 ### drop
 
+语法：`DROP TABLE table_name`
+
 ### date
 
 - 需不需要写一个对应的词法解析/句法解析？
+
