@@ -46,7 +46,9 @@ Table::~Table() {
   LOG_INFO("Table has been closed: %s", name());
 }
 
-RC Table::create(const char *path, const char *name, const char *base_dir, int attribute_count, const AttrInfo attributes[]) {
+RC Table::create(const char *name, const char *base_dir, int attribute_count, const AttrInfo attributes[]) {
+
+  std::string path = table_meta_file(base_dir, name); // 文件路径移到Table模块
 
   if (nullptr == name || common::is_blank(name)) {
     LOG_WARN("Name cannot be empty");
@@ -65,7 +67,7 @@ RC Table::create(const char *path, const char *name, const char *base_dir, int a
   // 使用 table_name.table记录一个表的元数据
   // 判断表文件是否已经存在
 
-  int fd = ::open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
+  int fd = ::open(path.c_str(), O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
   if (-1 == fd) {
     if (EEXIST == errno) {
       LOG_ERROR("Failed to create table file, it has been created. %s, EEXIST, %s",
@@ -112,7 +114,7 @@ RC Table::create(const char *path, const char *name, const char *base_dir, int a
 }
 
 RC Table::drop(){
-  
+
 }
 
 RC Table::open(const char *meta_file, const char *base_dir) {
