@@ -48,13 +48,13 @@ Table::~Table() {
 
 RC Table::create(const char *name, const char *base_dir, int attribute_count, const AttrInfo attributes[]) {
 
-  std::string path = table_meta_file(base_dir, name); // 文件路径移到Table模块
-
   if (nullptr == name || common::is_blank(name)) {
     LOG_WARN("Name cannot be empty");
     return RC::INVALID_ARGUMENT;
   }
   LOG_INFO("Begin to create table %s:%s", base_dir, name);
+
+  std::string path = table_meta_file(base_dir, name); // 文件路径移到Table模块
 
   if (attribute_count <= 0 || nullptr == attributes) {
     LOG_WARN("Invalid arguments. table_name=%s, attribute_count=%d, attributes=%p",
@@ -114,6 +114,17 @@ RC Table::create(const char *name, const char *base_dir, int attribute_count, co
 }
 
 RC Table::drop(const char *name, const char *base_dir){
+
+  if (nullptr == name || common::is_blank(name)) {
+    LOG_WARN("Name cannot be empty");
+    return RC::INVALID_ARGUMENT;
+  }
+  LOG_INFO("Begin to drop table %s:%s", base_dir, name);
+
+  std::string path = table_meta_file(base_dir, name); //Deal with path.
+
+  RC rc = RC::SUCCESS;
+  
 
 }
 
