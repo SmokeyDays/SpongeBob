@@ -32,7 +32,41 @@
 
 ### sql
 
+#### executor
 
+`executoin_stage.cpp` 事实上可以发现所有 _stage 的文件结构都非常类似，应该都是处理对应的记录和回溯问题
+
+`execution_node.cpp` 不太懂，看起来是一个涉及到 table, trx, tuple 的集成式处理文件
+
+`tuple.cpp` tuple 是元组，可以理解为一行中 field 的某个集合，或者更广泛的理解，就是一行，看起来是处理"加入关系"操作的文件。
+
+这里涉及到 schema，翻译为模式，实际语义很广，尚未分析。
+
+`value.cpp` .cpp 是个空文件，.h 是处理不同类型数据的大小比较
+
+#### optimizer
+
+`optimize_stage.cpp` 又一个 _stage (与"查询优化，调整重写语法树"相关，是使用教程中提到的需要着重做的点)
+
+#### parser
+
+`lex.yy.c` 词法解析
+
+`parse_stage.cpp` 又一个 _stage
+
+`parse.cpp` parse 翻译为词法，文件里涉及到了 SQL 的各种操作，看上去像是把用户指令翻译成数据库内部的信息，但我没搞清它在哪里被用到
+
+`reslove_stage.cpp` 又一个 _stage (查询缓存，决赛优化项目)
+
+`yacc_sql.tab.c` 语法解析
+
+#### plan_cache
+
+`plan_cache_stage.cpp` 又一个 _stage (执行计划缓存，决赛优化项目)
+
+#### query_cache
+
+`query_cache_stage.cpp` 又一个 _stage (查询缓存，决赛优化项目)
 
 ### storage
 
