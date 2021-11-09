@@ -98,7 +98,7 @@ RC Table::create(const char *name, const char *base_dir, int attribute_count, co
   table_meta_.serialize(fs);
   fs.close();
 
-  std::string data_file = std::string(base_dir) + "/" + name + TABLE_DATA_SUFFIX;
+  std::string data_file = table_data_file(base_dir, name);
   data_buffer_pool_ = theGlobalDiskBufferPool();
   rc = data_buffer_pool_->create_file(data_file.c_str());
   if (rc != RC::SUCCESS) {
@@ -106,7 +106,7 @@ RC Table::create(const char *name, const char *base_dir, int attribute_count, co
     return rc;
   }
 
-  rc = init_record_handler(base_dir);
+  rc = init_record_handler(base_dir); // Load the file from disk into the buffer pool.
 
   base_dir_ = base_dir;
   LOG_INFO("Successfully create table %s:%s", base_dir, name);
@@ -124,8 +124,21 @@ RC Table::drop(const char *name, const char *base_dir){
   std::string path = table_meta_file(base_dir, name); //Deal with path.
 
   RC rc = RC::SUCCESS;
-  
+  if(remove(path.c_str())){
+    LOG_ERROR("Failed to remove file from disk. file name=%s,errmsg=%s",path, strerror(errno));
+    rc = RC::IOERR;
+  }
 
+  std::string data_file = table_data_file(base_dir, name);
+  if(remove(data_file.c_str())){
+    LOG_ERROR("Failed to remove disk buffer pool of data file. file name=%s", data_file.c_str());
+  }
+  // Remove files from disk.
+
+  // Todo: Clear buffer pool.
+
+  LOG_INFO("Successfully drop table %s:%s", base_dir, name);
+  return rc;
 }
 
 RC Table::open(const char *meta_file, const char *base_dir) {
