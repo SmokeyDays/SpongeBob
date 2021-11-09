@@ -113,31 +113,48 @@ RC Table::create(const char *name, const char *base_dir, int attribute_count, co
   return rc;
 }
 
-RC Table::drop(const char *name, const char *base_dir){
+RC Table::drop(const char *base_dir){
 
-  if (nullptr == name || common::is_blank(name)) {
+  RC rc = sync();
+  if(rc != RC::SUCCESS) {
+    LOG_ERROR("Sync Failed when drop table.");
+    return rc;
+  }
+
+  if (nullptr == name() || common::is_blank(name())) {
     LOG_WARN("Name cannot be empty");
     return RC::INVALID_ARGUMENT;
   }
-  LOG_INFO("Begin to drop table %s:%s", base_dir, name);
+  LOG_INFO("Begin to drop table %s:%s", base_dir, name());
 
-  std::string path = table_meta_file(base_dir, name); //Deal with path.
+  std::string path = table_meta_file(base_dir, name()); //Deal with path.
 
-  RC rc = RC::SUCCESS;
+  // Remove files from disk.
   if(remove(path.c_str())){
     LOG_ERROR("Failed to remove file from disk. file name=%s,errmsg=%s",path, strerror(errno));
     rc = RC::IOERR;
   }
 
-  std::string data_file = table_data_file(base_dir, name);
+  std::string data_file = table_data_file(base_dir, name());
   if(remove(data_file.c_str())){
     LOG_ERROR("Failed to remove disk buffer pool of data file. file name=%s", data_file.c_str());
   }
-  // Remove files from disk.
 
   // Todo: Clear buffer pool.
 
-  LOG_INFO("Successfully drop table %s:%s", base_dir, name);
+  // Clear Index.
+  const int index_num = table_meta_.index_num();
+  for (int i = 0; i < index_num; ++i) {
+    ((BplusTreeIndex*)indexes_[i])->close();
+    const IndexMeta* index_meta = table_meta_.index(i);
+    std::string index_path = index_data_file(base_dir, name(), index_meta->name());
+    if(0 != remove(index_path.c_str())){
+      LOG_ERROR("Remove index from path %s:%s.", index_path, index_meta->name());
+      return RC::IOERR;
+    }
+  }
+
+  LOG_INFO("Successfully drop table %s:%s", base_dir, name());
   return rc;
 }
 

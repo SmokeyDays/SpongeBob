@@ -76,14 +76,13 @@ RC Db::drop_table(const char *table_name){
     return RC::SCHEMA_TABLE_NOT_EXIST;
   }
 
-  std::string table_file_path = table_meta_file(path_.c_str(), table_name);
-  Table *table = new Table();
-  rc = table->drop(table_name, path_.c_str());
+  Table *table = opened_tables_[table_name];
+  rc = table->drop(path_.c_str());
   if (rc != RC::SUCCESS) {
-    delete table;
     return rc;
   }
 
+  delete table;
   opened_tables_.erase(table_name);
   LOG_INFO("Drop table success. table name=%s", table_name);
   return RC::SUCCESS;

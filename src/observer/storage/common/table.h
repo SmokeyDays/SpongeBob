@@ -43,7 +43,11 @@ public:
    */
   RC create(const char *name, const char *base_dir, int attribute_count, const AttrInfo attributes[]);
 
-  RC drop(const char *name, const char *base_dir);
+  /**
+   * 删除一个表
+   * @param base_dir 表数据存放的路径
+   */
+  RC drop(const char *base_dir);
 
   /**
    * 打开一个表
@@ -101,7 +105,7 @@ private:
   DiskBufferPool *        data_buffer_pool_; /// 数据文件关联的buffer pool
   int                     file_id_;
   RecordFileHandler *     record_handler_;   /// 记录操作
-  std::vector<Index *>    indexes_;
+  std::vector<Index *>    indexes_;          /// Record the pointer of indexes.
 };
 
 #endif // __OBSERVER_STORAGE_COMMON_TABLE_H__
