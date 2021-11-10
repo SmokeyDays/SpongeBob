@@ -27,7 +27,7 @@ See the Mulan PSL v2 for more details. */
 typedef struct {
   char *relation_name;   // relation name (may be NULL) 表名
   char *attribute_name;  // attribute name              属性名
-} RelAttr;
+} RelAttr; //relation-attr，用在...
 
 typedef enum {
   EQUAL_TO,     //"="     0
@@ -37,7 +37,7 @@ typedef enum {
   GREAT_EQUAL,  //">="    4
   GREAT_THAN,   //">"     5
   NO_OP
-} CompOp;
+} CompOp; //大概是询问时的限制
 
 //属性值类型
 typedef enum { UNDEFINED, CHARS, INTS, FLOATS } AttrType;
@@ -46,7 +46,7 @@ typedef enum { UNDEFINED, CHARS, INTS, FLOATS } AttrType;
 typedef struct _Value {
   AttrType type;  // type of value
   void *data;     // value
-} Value;
+} Value; //把 value 和 attrtype 绑定成一个新的 Value
 
 typedef struct _Condition {
   int left_is_attr;    // TRUE if left-hand side is an attribute
@@ -58,7 +58,7 @@ typedef struct _Condition {
                        // 1时，操作符右边是属性名，0时，是属性值
   RelAttr right_attr;  // right-hand side attribute if right_is_attr = TRUE 右边的属性
   Value right_value;   // right-hand side value if right_is_attr = FALSE
-} Condition;
+} Condition; //对这个属性名和属性值的转换有一些不解，先存疑
 
 // struct of select
 typedef struct {
@@ -68,21 +68,21 @@ typedef struct {
   char *    relations[MAX_NUM];     // relations in From clause
   size_t    condition_num;          // Length of conditions in Where clause
   Condition conditions[MAX_NUM];    // conditions in Where clause
-} Selects;
+} Selects; //一个完整的 select 语句：在若干个 relation 中选择若干个属性，满足若干个 condition
 
 // struct of insert
 typedef struct {
   char *relation_name;    // Relation to insert into
   size_t value_num;       // Length of values
   Value values[MAX_NUM];  // values to insert
-} Inserts;
+} Inserts; //insert: 在一个 relation 中插入一个新的行，行有 value
 
 // struct of delete
 typedef struct {
   char *relation_name;            // Relation to delete from
   size_t condition_num;           // Length of conditions in Where clause
   Condition conditions[MAX_NUM];  // conditions in Where clause
-} Deletes;
+} Deletes; //delete: 在一个 relation 中删除若干个行，满足若干个 condition
 
 // struct of update
 typedef struct {
@@ -91,46 +91,46 @@ typedef struct {
   Value value;                    // update value
   size_t condition_num;           // Length of conditions in Where clause
   Condition conditions[MAX_NUM];  // conditions in Where clause
-} Updates;
+} Updates;//update: 在一个 relation 中选择一个满足若干个 condition 的属性，更新其 value，
 
 typedef struct {
   char *name;     // Attribute name
   AttrType type;  // Type of attribute
   size_t length;  // Length of attribute
-} AttrInfo;
+} AttrInfo;//属性-信息，这个用在定义新属性的时候
 
 // struct of craete_table
 typedef struct {
   char *relation_name;           // Relation name
   size_t attribute_count;        // Length of attribute
   AttrInfo attributes[MAX_NUM];  // attributes
-} CreateTable;
+} CreateTable;//create_table: 创建名为 relation_name 的新表，有若干个新属性
 
 // struct of drop_table
 typedef struct {
   char *relation_name;  // Relation name
-} DropTable;
+} DropTable;//drop_table: relation_name
 
 // struct of create_index
 typedef struct {
   char *index_name;      // Index name
   char *relation_name;   // Relation name
   char *attribute_name;  // Attribute name
-} CreateIndex;
+} CreateIndex; //CreateIndex: 注意啦, index 是有 name 的！
 
 // struct of  drop_index
 typedef struct {
   const char *index_name;  // Index name
-} DropIndex;
+} DropIndex; //DropIndex
 
 typedef struct {
   const char *relation_name;
-} DescTable;
+} DescTable; //存疑, desctable
 
 typedef struct {
   const char *relation_name;
   const char *file_name;
-} LoadData;
+} LoadData; //loaddata! 这个数据库好高级
 
 union Queries {
   Selects selection;
@@ -144,7 +144,7 @@ union Queries {
   DescTable desc_table;
   LoadData load_data;
   char *errors;
-};
+}; //Querys, 把所有可能的信息放到一起去了，这个想法还是非常不错的
 
 // 修改yacc中相关数字编码为宏定义
 enum SqlCommandFlag {
@@ -166,12 +166,13 @@ enum SqlCommandFlag {
   SCF_LOAD_DATA,
   SCF_HELP,
   SCF_EXIT
-};
+}; 
+
 // struct of flag and sql_struct
 typedef struct Query {
   enum SqlCommandFlag flag;
-  union Queries sstr;
-} Query;
+  union Queries sstr; 
+} Query; //对的，Queries 要配合 SCF 使用才能确定一个 Query
 
 #ifdef __cplusplus
 extern "C" {

@@ -82,18 +82,18 @@ RC DiskBufferPool::create_file(const char *file_name)
 RC DiskBufferPool::open_file(const char *file_name, int *file_id)
 {
   int fd, i;
-  // This part isn't gentle, the better method is using LRU queue.
+  // This part isn't gentle, the better method is using LRU queue.//LRU不是删页面的算法吗
   for (i = 0; i < MAX_OPEN_FILE; i++) {
     if (open_list_[i]) {
       if (!strcmp(open_list_[i]->file_name, file_name)) {
-        *file_id = i;
+        *file_id = i;//传参未给定file_id
         LOG_INFO("%s has already been opened.", file_name);
         return RC::SUCCESS;
       }
     }
   }
   i = 0;
-  while (i < MAX_OPEN_FILE && open_list_[i++])
+  while (i < MAX_OPEN_FILE && open_list_[i++])//文件被打开的数量是一定的
     ;
   if (i >= MAX_OPEN_FILE && open_list_[i - 1]) {
     LOG_ERROR("Failed to open file %s, because too much files has been opened.", file_name);
@@ -121,6 +121,7 @@ RC DiskBufferPool::open_file(const char *file_name, int *file_id)
   cloned_file_name[file_name_len - 1] = '\0';
   file_handle->file_name = cloned_file_name;
   file_handle->file_desc = fd;
+  //打开文件后尝试分配 block 硬盘页
   if ((tmp = allocate_block(&file_handle->hdr_frame)) != RC::SUCCESS) {
     LOG_ERROR("Failed to allocate block for %s's BPFileHandle.", file_name);
     delete file_handle;
@@ -137,7 +138,7 @@ RC DiskBufferPool::open_file(const char *file_name, int *file_id)
     close(fd);
     delete file_handle;
     return tmp;
-  }
+  }//尝试打开一个页面
 
   file_handle->hdr_page = &(file_handle->hdr_frame->page);
   file_handle->bitmap = file_handle->hdr_page->data + BP_FILE_SUB_HDR_SIZE;
@@ -158,7 +159,7 @@ RC DiskBufferPool::close_file(int file_id)
 
   BPFileHandle *file_handle = open_list_[file_id];
   file_handle->hdr_frame->pin_count--;
-  if ((tmp = force_all_pages(file_handle)) != RC::SUCCESS) {
+  if ((tmp = force_all_pages(file_handle)) != RC::SUCCESS) {//如果还有pin，是当然不行的
     file_handle->hdr_frame->pin_count++;
     LOG_ERROR("Failed to closeFile %d:%s, due to failed to force all pages.", file_id, file_handle->file_name);
     return tmp;
@@ -195,7 +196,7 @@ RC DiskBufferPool::get_this_page(int file_id, PageNum page_num, BPPageHandle *pa
       continue;
 
     // This page has been loaded.
-    if (bp_manager_.frame[i].page.page_num == page_num) {
+    if (bp_manager_.frame[i].page.page_num == page_num) {//get_page 也要算上 pin
       page_handle->frame = bp_manager_.frame + i;
       page_handle->frame->pin_count++;
       page_handle->frame->acc_time = current_time();
@@ -209,7 +210,7 @@ RC DiskBufferPool::get_this_page(int file_id, PageNum page_num, BPPageHandle *pa
     LOG_ERROR("Failed to load page %s:%d, due to failed to alloc page.", file_handle->file_name, page_num);
     return tmp;
   }
-  page_handle->frame->dirty = false;
+  page_handle->frame->dirty = false;//每次都把 dirty 变成 false
   page_handle->frame->file_desc = file_handle->file_desc;
   page_handle->frame->pin_count = 1;
   page_handle->frame->acc_time = current_time();

@@ -113,6 +113,7 @@ StageEvent *ParseStage::handle_request(StageEvent *event) {
   SQLStageEvent *sql_event = static_cast<SQLStageEvent *>(event);
   const std::string &sql = sql_event->get_sql();
   
+  
   Query *result = query_create();
   if (nullptr == result) {
     LOG_ERROR("Failed to create query.");

@@ -29,6 +29,10 @@ See the Mulan PSL v2 for more details. */
 
 #include "common/defs.h"
 
+pid_t gettid(void){
+  return syscall(__NR_gettid);
+}
+
 namespace common
 {
 

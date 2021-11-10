@@ -36,52 +36,57 @@ typedef int PageNum;
 #define BP_BUFFER_SIZE 50
 #define MAX_OPEN_FILE 1024
 
+//Bufferpool 的一个页 page，包含 page_num
 typedef struct {
   PageNum page_num;
   char data[BP_PAGE_DATA_SIZE];
 } Page;
 // sizeof(Page) should be equal to BP_PAGE_SIZE
 
+//BPFileSubHeader
 typedef struct {
   PageNum page_count;
   int allocated_pages;
-} BPFileSubHeader;
+} BPFileSubHeader; //file 的 frameheader
 
+//Frame -- page
 typedef struct {
-  bool dirty;
-  unsigned int pin_count;
-  unsigned long acc_time;
-  int file_desc;
+  bool dirty;//脏标记
+  unsigned int pin_count;//引用计数，表示当前占用的线程数量，只有等于 0 才能删除
+  unsigned long acc_time;//时间戳，用 current_time 更新
+  int file_desc; //?磁盘路径
   Page page;
-} Frame;
+} Frame; //其实 frame 应该才是一个完整的"页面"
 
+//BPPageHandle -- Frame
 typedef struct {
   bool open;
   Frame *frame;
 } BPPageHandle;
 
-class BPFileHandle{
+class BPFileHandle{//管理一个文件
 public:
   BPFileHandle() {
     memset(this, 0, sizeof(*this));
-  }
+  }//构造函数
 
 public:
-  bool bopen;
+  bool bopen;//当前文件是否打开
   const char *file_name;
-  int file_desc;
-  Frame *hdr_frame;
+  int file_desc;//文件 fd=open(file_name,0_RDWR)
+  Frame *hdr_frame;//frame 里面也有一个 file_desc
   Page *hdr_page;
-  char *bitmap;
+  char *bitmap;//?
   BPFileSubHeader *file_sub_header;
 } ;
 
-class BPManager {
+//管理一个文件中的所有页面
+class BPManager {//BPManager 和 BPhandle 之间又有什么联系呢
 public:
   BPManager(int size = BP_BUFFER_SIZE) {
     this->size = size;
-    frame = new Frame[size];
-    allocated = new bool[size];
+    frame = new Frame[size];//所以 BP_BUFFER_SIZE 大概是一个文件的页面数量
+    allocated = new bool[size];//是否分配的标记
     for (int i = 0; i < size; i++) {
       allocated[i] = false;
       frame[i].pin_count = 0;
@@ -96,11 +101,11 @@ public:
     allocated = nullptr;
   }
 
-  Frame *alloc() {
+  Frame *alloc() {//未分配页面的分配
     return nullptr; // TODO for test
   }
 
-  Frame *get(int file_desc, PageNum page_num) {
+  Frame *get(int file_desc, PageNum page_num) {//已分配页面的get
     return nullptr; // TODO for test
   }
 
@@ -114,6 +119,7 @@ public:
   bool *allocated = nullptr;
 };
 
+//管理所有文件的页面
 class DiskBufferPool {
 public:
   /**
@@ -122,13 +128,13 @@ public:
   RC create_file(const char *file_name);
 
   /**
-   * 根据文件名打开一个分页文件，返回文件ID
+   * 根据文件名打开一个分页文件，返回文件ID//文件 ID 是啥
    * @return
    */
   RC open_file(const char *file_name, int *file_id);
 
   /**
-   * 关闭fileID对应的分页文件
+   * 关闭fileID对应的分页文件//哦
    */
   RC close_file(int file_id);
 
@@ -186,6 +192,7 @@ public:
    */
   RC get_page_count(int file_id, int *page_count);
 
+//what is this???
   RC flush_all_pages(int file_id);
 
 protected:
@@ -199,10 +206,10 @@ protected:
    */
   RC force_page(BPFileHandle *file_handle, PageNum page_num);
   RC force_all_pages(BPFileHandle *file_handle);
-  RC check_file_id(int file_id);
+  RC check_file_id(int file_id);//是否存在
   RC check_page_num(PageNum page_num, BPFileHandle *file_handle);
   RC load_page(PageNum page_num, BPFileHandle *file_handle, Frame *frame);
-  RC flush_block(Frame *frame);
+  RC flush_block(Frame *frame);//block?
 
 private:
   BPManager bp_manager_;
