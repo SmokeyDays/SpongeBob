@@ -40,7 +40,7 @@ typedef enum {
 } CompOp; //大概是询问时的限制
 
 //属性值类型
-typedef enum { UNDEFINED, CHARS, INTS, FLOATS } AttrType;
+typedef enum { UNDEFINED, CHARS, INTS, FLOATS, DATE } AttrType;
 
 //属性值
 typedef struct _Value {
