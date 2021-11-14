@@ -47,7 +47,7 @@ public:
 private:
   std::string  name_;
   AttrType     attr_type_;
-  int          attr_offset_;
+  int          attr_offset_; // Skip some lines?
   int          attr_len_;
   bool         visible_;
 };
