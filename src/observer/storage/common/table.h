@@ -57,9 +57,15 @@ public:
   RC open(const char *meta_file, const char *base_dir);
   
   RC insert_record(Trx *trx, int value_num, const Value *values);
-  RC update_record(Trx *trx, const char *attribute_name, const Value *value, int condition_num, const Condition conditions[], int *updated_count);
+  RC update_record(Trx *trx, const char *attribute_name, const Value *value, ConditionFilter *filter, int *updated_count);
   RC delete_record(Trx *trx, ConditionFilter *filter, int *deleted_count);
 
+
+  /**
+   * 打开一个表
+   * @param context A void pointer, which may be a Metaprogramming tool.
+   * @param record_reader A lambda expression, which will be excute when scanning whole table.
+   */
   RC scan_record(Trx *trx, ConditionFilter *filter, int limit, void *context, void (*record_reader)(const char *data, void *context));
 
   RC create_index(Trx *trx, const char *index_name, const char *attribute_name);
@@ -73,8 +79,10 @@ public:
 
 public:
   RC commit_insert(Trx *trx, const RID &rid);
+  RC commit_update(Trx *trx, const RID &rid, const char *attribute_name, const Value *value);
   RC commit_delete(Trx *trx, const RID &rid);
   RC rollback_insert(Trx *trx, const RID &rid);
+  RC rollback_update(Trx *trx, const RID &rid); // Todo: complete this?
   RC rollback_delete(Trx *trx, const RID &rid);
 
 private:
@@ -84,6 +92,7 @@ private:
   IndexScanner *find_index_for_scan(const DefaultConditionFilter &filter);
 
   RC insert_record(Trx *trx, Record *record);
+  RC update_record(Trx *trx, Record *record, const char *attribute_name, const Value *value);
   RC delete_record(Trx *trx, Record *record);
 
 private:

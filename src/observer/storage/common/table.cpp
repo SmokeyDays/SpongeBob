@@ -566,8 +566,99 @@ RC Table::create_index(Trx *trx, const char *index_name, const char *attribute_n
   return rc;
 }
 
-RC Table::update_record(Trx *trx, const char *attribute_name, const Value *value, int condition_num, const Condition conditions[], int *updated_count) {
-  return RC::GENERIC_ERROR;
+class RecordUpdater {
+public:
+  RecordUpdater(Table &table, Trx *trx, const char *attribute_name, const Value *value) : table_(table), trx_(trx), attribute_name_(attribute_name), value_(value) {}
+
+  RC update_record(Record *record) {
+    RC rc = table_.update_record(trx_, record, attribute_name_, value_);
+    if(rc == RC::SUCCESS) {
+      ++updated_count_;
+    }
+    return rc;
+  }
+
+  int updated_count() const {
+    return updated_count_;
+  }
+private:
+  Table & table_;
+  Trx *trx_;
+  const char *attribute_name_;
+  const Value *value_;
+  int updated_count_ = 0;
+};
+
+static RC record_reader_update_adapter(Record *record, void *context) {
+  RecordUpdater &record_updater = *(RecordUpdater *)context;
+  return record_updater.update_record(record);
+}
+
+RC Table::update_record(Trx *trx, const char *attribute_name, const Value *value, ConditionFilter *filter, int *updated_count) {
+  RC rc = RC::SUCCESS;
+  // Todo: Do some check?
+  char *record_data;
+  // Wrong: make_record makes a string implies information of a row.
+  // rc = make_record(1, value, record_data);
+  if (rc != RC::SUCCESS) {
+    LOG_ERROR("Failed to create a record. rc=%d:%s", rc, strrc(rc));
+    return rc;
+  }
+
+  Record record;
+  // record.data = record_data;
+  RecordUpdater updater(*this, trx, attribute_name, value);
+  LOG_INFO("Started to update record. Attr:%s.", attribute_name);
+  rc = scan_record(trx, filter, -1, &updater, record_reader_update_adapter);
+  if (updated_count != nullptr) {
+    *updated_count = updater.updated_count();
+  }
+  return rc;
+}
+
+RC Table::update_record(Trx *trx, Record *record, const char *attribute_name, const Value *value) {
+  RC rc = RC::SUCCESS;
+  // Check whether the trx is null.
+  if (trx != nullptr) {
+    // Here skipped the trx step.
+    // rc = trx->update_record();
+    // Here is the temporarily solution.
+    rc = commit_update(trx, record->rid, attribute_name, value);
+    if(rc != RC::SUCCESS) {
+      LOG_ERROR("Failed to update record. table name=%s, rc=%d:%s", table_meta_.name(), rc, strrc(rc));
+    }
+  } else {
+    LOG_ERROR("There's sth. wrong happened in the trx");
+    return RC::GENERIC_ERROR;
+  }
+
+  return rc;
+}
+
+RC Table::commit_update(Trx *trx, const RID &rid, const char *attribute_name, const Value *value) {
+  if (nullptr == value || nullptr == attribute_name) {
+    LOG_ERROR("Illegal Params.");
+    return RC::GENERIC_ERROR;
+  }
+
+  Record record;
+  RC rc = record_handler_->get_record(&rid, &record);
+  if (rc != RC::SUCCESS) {
+    LOG_ERROR("Failed to find targetted record.");
+    return rc;
+  }
+
+  const FieldMeta *field_meta = table_meta_.field(attribute_name);
+  printf("%d %d \n", field_meta->offset(), field_meta->len());
+  memcpy(record.data + field_meta->offset(), value->data, field_meta->len());
+  
+  rc = record_handler_->update_record(&record);
+  if (rc != RC::SUCCESS) {
+    LOG_ERROR("Failed to insert record.");
+    return rc;
+  }
+  // Todo: commit update record.
+  return rc;
 }
 
 class RecordDeleter {
