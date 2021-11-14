@@ -79,8 +79,10 @@ public:
 
 public:
   RC commit_insert(Trx *trx, const RID &rid);
+  RC commit_update(Trx *trx, const RID &rid, const char *attribute_name, const Value *value);
   RC commit_delete(Trx *trx, const RID &rid);
   RC rollback_insert(Trx *trx, const RID &rid);
+  RC rollback_update(Trx *trx, const RID &rid); // Todo: complete this?
   RC rollback_delete(Trx *trx, const RID &rid);
 
 private:
@@ -90,6 +92,7 @@ private:
   IndexScanner *find_index_for_scan(const DefaultConditionFilter &filter);
 
   RC insert_record(Trx *trx, Record *record);
+  RC update_record(Trx *trx, Record *record, const char *attribute_name, const Value *value);
   RC delete_record(Trx *trx, Record *record);
 
 private:
