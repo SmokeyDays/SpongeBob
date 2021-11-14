@@ -40,7 +40,8 @@ typedef enum {
 } CompOp; //大概是询问时的限制
 
 //属性值类型
-typedef enum { UNDEFINED, CHARS, INTS, FLOATS, DATE } AttrType;
+typedef enum { UNDEFINED, CHARS, INTS, FLOATS, DATES } AttrType;
+//对于新增的 date 字段的理解：AttrType = DATES, 但 data 实际是 int 类型
 
 //属性值
 typedef struct _Value {
@@ -184,6 +185,7 @@ void relation_attr_destroy(RelAttr *relation_attr);
 void value_init_integer(Value *value, int v);
 void value_init_float(Value *value, float v);
 void value_init_string(Value *value, const char *v);
+void value_init_datestring(Value *value, const char *v);
 void value_destroy(Value *value);
 
 void condition_init(Condition *condition, CompOp comp, int left_is_attr, RelAttr *left_attr, Value *left_value,

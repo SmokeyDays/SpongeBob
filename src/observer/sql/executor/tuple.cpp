@@ -219,9 +219,16 @@ void TupleRecordConverter::add_record(const char *record) {
     const FieldMeta *field_meta = table_meta.field(field.field_name());
     assert(field_meta != nullptr);
     switch (field_meta->type()) {
-      case INTS: {
+      case INTS:{
         int value = *(int*)(record + field_meta->offset());
         tuple.add(value);
+      }
+      break;
+      case DATES:{
+        int value = *(int*)(record + field_meta->offset());
+        char buf[16] = {0};
+        snprintf(buf,sizeof(buf),"%04d-%02d-%02d",value/10000,    (value%10000)/100,value%100); // 注意这里月份和天数，不足两位时需要填充0
+        tuple.add(buf,strlen(buf));
       }
       break;
       case FLOATS: {

@@ -13,6 +13,7 @@ See the Mulan PSL v2 for more details. */
 //
 
 #include <mutex>
+#include <cstring>
 #include "sql/parser/parse.h"
 #include "rc.h"
 #include "common/log/log.h"
@@ -48,16 +49,43 @@ void value_init_float(Value *value, float v) {
   value->data = malloc(sizeof(v));
   memcpy(value->data, &v, sizeof(v));
 }
+
 void value_init_string(Value *value, const char *v) {
   value->type = CHARS;
   value->data = strdup(v);
+}
+
+bool check_date(int y, int m, int d)
+{
+    static int mon[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    bool leap = (y%400==0 || (y%100 && y%4==0));
+    return y > 0
+        && (m > 0)&&(m <= 12)
+        && (d > 0)&&(d <= ((m==2 && leap)?1:0) + mon[m]);
+}
+void value_init_datestring(Value *value, const char *v){
+  value->type = DATES; 
+  int p1=0, p2=0, l=strlen(v);
+  for (int i=0; i<l; ++i) if(v[i]=='-') { p1=i; break;}
+  for (int i=p1+1; i<l; ++i) if(v[i]=='-') { p2=i; break;}
+
+  int v1=0, v2=0, v3=0;
+  for (int i=0; i<p1; ++i) v1=v1*10+(v[i]-'0');
+  for (int i=p1+1; i<p2; ++i) v2=v2*10+(v[i]-'0');
+  for (int i=p2+1; i<l; ++i) v3=v3*10+(v[i]-'0');
+  int date_num=v1*10000+v2*100+v3;
+
+  if(check_date(v1,v2,v3)==false)
+  LOG_ERROR("FAILURE\n");
+
+  value->data = malloc(sizeof(date_num));
+  memcpy(value->data, &date_num, sizeof(date_num));
 }
 void value_destroy(Value *value) {
   value->type = UNDEFINED;
   free(value->data);
   value->data = nullptr;
 }
-
 void condition_init(Condition *condition, CompOp comp, 
                     int left_is_attr, RelAttr *left_attr, Value *left_value,
                     int right_is_attr, RelAttr *right_attr, Value *right_value) {

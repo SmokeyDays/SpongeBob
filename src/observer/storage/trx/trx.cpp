@@ -37,7 +37,7 @@ const char *Trx::trx_field_name() {
 }
 
 AttrType Trx::trx_field_type() {
-  return INTS;
+  return INTS;//SPONGEBOB: "I DON'T UNDERSTAND BUT I THOUGHT WE DON'T NEED TO DO TRX"
 }
 
 int Trx::trx_field_len() {
