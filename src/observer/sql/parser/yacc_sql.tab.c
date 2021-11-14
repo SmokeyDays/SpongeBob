@@ -236,7 +236,8 @@ enum yysymbol_kind_t
   YYSYMBOL_condition_list = 81,            /* condition_list  */
   YYSYMBOL_condition = 82,                 /* condition  */
   YYSYMBOL_comOp = 83,                     /* comOp  */
-  YYSYMBOL_load_data = 84                  /* load_data  */
+  YYSYMBOL_load_data = 84,                  /* load_data  */
+  YYSYMBOL_DATE_T = 85                      /* DATE_T */       
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 

@@ -114,13 +114,13 @@ StageEvent *ParseStage::handle_request(StageEvent *event) {
   const std::string &sql = sql_event->get_sql();
   
   
-  Query *result = query_create();
+  Query *result = query_create();//分配一个 query 的空间
   if (nullptr == result) {
     LOG_ERROR("Failed to create query.");
     return nullptr;
   }
 
-  RC ret = parse(sql.c_str(), result);
+  RC ret = parse(sql.c_str(), result); //解析然后
   if (ret != RC::SUCCESS) {
     // set error information to event
     /*

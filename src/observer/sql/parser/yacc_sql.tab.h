@@ -101,7 +101,8 @@ extern int yydebug;
     PATH = 302,                    /* PATH  */
     SSS = 303,                     /* SSS  */
     STAR = 304,                    /* STAR  */
-    STRING_V = 305                 /* STRING_V  */
+    STRING_V = 305,                 /* STRING_V  */
+    DATE_T = 306                    /* DATE_T */ 
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif

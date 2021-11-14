@@ -320,7 +320,10 @@ RC insert_record_from_file(Table *table, std::vector<std::string> &file_values,
           value_init_integer(&record_values[i], int_value);
         }
       }
-
+      break;
+      case DATES: {
+        value_init_datestring(&record_values[i], file_value.c_str());
+      }
       break;
       case FLOATS: {
         deserialize_stream.clear();
