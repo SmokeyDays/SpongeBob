@@ -103,7 +103,6 @@ ParserContext *get_context(yyscan_t scanner)
         GE
         NE
 		DATE_T
-		DATE_STRING
 
 %union {
   struct _Attr *attr;

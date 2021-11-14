@@ -75,8 +75,10 @@ void value_init_datestring(Value *value, const char *v){
   for (int i=p2+1; i<l; ++i) v3=v3*10+(v[i]-'0');
   int date_num=v1*10000+v2*100+v3;
 
-  if(check_date(v1,v2,v3)==false)
-  LOG_ERROR("FAILURE\n");
+  if(check_date(v1,v2,v3)==false){
+    printf("FAILURE\n");
+    LOG_ERROR("the data input is not the type 'DATE'\n");
+  }
 
   value->data = malloc(sizeof(date_num));
   memcpy(value->data, &date_num, sizeof(date_num));
