@@ -653,6 +653,10 @@ RC Table::commit_update(Trx *trx, const RID &rid, const char *attribute_name, co
     LOG_ERROR("Illegal Column");
     return RC::INVALID_ARGUMENT;
   }
+  if(field_meta->type() != value->type) {
+    LOG_ERROR("Illegal Type");
+    return RC::GENERIC_ERROR;
+  }
   memcpy(record.data + field_meta->offset(), value->data, field_meta->len());
 
   rc = record_handler_->update_record(&record);
