@@ -649,9 +649,12 @@ RC Table::commit_update(Trx *trx, const RID &rid, const char *attribute_name, co
   }
 
   const FieldMeta *field_meta = table_meta_.field(attribute_name);
-  printf("%d %d \n", field_meta->offset(), field_meta->len());
+  if(nullptr == field_meta) {
+    LOG_ERROR("Illegal Column");
+    return RC::INVALID_ARGUMENT;
+  }
   memcpy(record.data + field_meta->offset(), value->data, field_meta->len());
-  
+
   rc = record_handler_->update_record(&record);
   if (rc != RC::SUCCESS) {
     LOG_ERROR("Failed to insert record.");
