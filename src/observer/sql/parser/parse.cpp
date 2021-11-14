@@ -54,15 +54,6 @@ void value_init_string(Value *value, const char *v) {
   value->type = CHARS;
   value->data = strdup(v);
 }
-
-bool check_date(int y, int m, int d)
-{
-    static int mon[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    bool leap = (y%400==0 || (y%100 && y%4==0));
-    return y > 0
-        && (m > 0)&&(m <= 12)
-        && (d > 0)&&(d <= ((m==2 && leap)?1:0) + mon[m]);
-}
 void value_init_datestring(Value *value, const char *v){
   value->type = DATES; 
   int p1=0, p2=0, l=strlen(v);
@@ -74,11 +65,7 @@ void value_init_datestring(Value *value, const char *v){
   for (int i=p1+1; i<p2; ++i) v2=v2*10+(v[i]-'0');
   for (int i=p2+1; i<l; ++i) v3=v3*10+(v[i]-'0');
   int date_num=v1*10000+v2*100+v3;
-
-  if(check_date(v1,v2,v3)==false){
-    printf("FAILURE\n");
-    LOG_ERROR("the data input is not the type 'DATE'\n");
-  }
+  //SPONGEBOB: "HERE DON'T CHECK IF A DATE IS OK"
 
   value->data = malloc(sizeof(date_num));
   memcpy(value->data, &date_num, sizeof(date_num));

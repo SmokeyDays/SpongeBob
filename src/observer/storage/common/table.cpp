@@ -231,6 +231,14 @@ RC Table::rollback_insert(Trx *trx, const RID &rid) {
   return rc;
 }
 
+bool check_date(int y, int m, int d)
+{
+    static int mon[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    bool leap = (y%400==0 || (y%100 && y%4==0));
+    return y > 0
+        && (m > 0)&&(m <= 12)
+        && (d > 0)&&(d <= ((m==2 && leap)?1:0) + mon[m]);
+}
 RC Table::insert_record(Trx *trx, Record *record) {
   RC rc = RC::SUCCESS;
 
@@ -312,6 +320,14 @@ RC Table::make_record(int value_num, const Value *values, char * &record_out) {
   for (int i = 0; i < value_num; i++) {
     const FieldMeta *field = table_meta_.field(i + normal_field_start_index);
     const Value &value = values[i];
+    if (field->type() == DATES) {
+      int v1=(*(int *)value.data)/10000, v2=(*(int *)value.data)%10000/100, v3=(*(int *)value.data)%100;
+      if (check_date(v1,v2,v3) == false){
+        LOG_ERROR("Invalid value type. field name=%s, type=%d, but given=%d",
+        field->name(), field->type(), value.type);
+        return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+      }
+    }
     if (field->type() != value.type) {
       LOG_ERROR("Invalid value type. field name=%s, type=%d, but given=%d",
         field->name(), field->type(), value.type);
