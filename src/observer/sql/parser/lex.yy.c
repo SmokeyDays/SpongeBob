@@ -1147,7 +1147,7 @@ RETURN_TOKEN(GT);
 case 49:
 YY_RULE_SETUP
 #line 86 "lex_sql.l"
-yylval->string=strd(yytext); RETURN_TOKEN(DATE_STRING);
+yylval->string=strdup(yytext); RETURN_TOKEN(DATE_STRING);
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
