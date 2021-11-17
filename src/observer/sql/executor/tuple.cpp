@@ -203,6 +203,15 @@ std::string float_to_string (float v) { //保留两位小数
   sprintf(c, "%.2f", v);
   return c;
 }
+
+const char *AGGR_TYPE_NAME[] = {
+  "undefined",
+  "MAX",
+  "MIN",
+  "COUNT",
+  "AVG"
+};
+
 void TupleSet::print_aggregation(std::ostream &os, const Selects &selects) const {
   if (schema_.fields().empty()) {
     LOG_WARN("Got empty schema");
@@ -228,6 +237,14 @@ void TupleSet::print_aggregation(std::ostream &os, const Selects &selects) const
       field_content[cnt].push_back((*iter)->get_value_string());
     }
   }
+
+  for (int i=selects.aggre_num - 1; i>=0; --i) {
+    os << AGGR_TYPE_NAME[selects.aggres[i].aggre_type] << "(" << selects.aggres[i].aggre_field_name << ")";
+    if(0 != i) {
+      os << " | ";
+    }
+  }
+  os << "\n";
 
   for (int i=selects.aggre_num - 1; i>=0; --i){
     std::string field_name = selects.aggres[i].aggre_field_name;
