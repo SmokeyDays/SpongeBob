@@ -25,6 +25,7 @@ See the Mulan PSL v2 for more details. */
 #include "storage/common/table.h"
 #include "storage/common/condition_filter.h"
 
+// Realize Singleton Pattern
 DefaultHandler &DefaultHandler::get_default() {
   static DefaultHandler handler;
   return handler;
