@@ -184,14 +184,16 @@ void TupleSet::print(std::ostream &os) const {
 
 int string_to_int (std::string str) {
   int v=0, l=str.length();
-  for(int i=l-1;i>=0;--i) v=v*10+str[i]-'0';
-  return v;
+  if(str[0]=='-') for(int i=1;i<=l-1;++i) v=v*10+(str[i]-'0');
+  else for(int i=0;i<=l-1;++i) v=v*10+(str[i]-'0');
+  return str[0]=='-'?-v:v;
 }
 float string_to_float (std::string str) { //保证小数点两位
   float v=0, l=str.length();
-  for(int i=l-1-3;i>=0;--i) v=v*10+(str[i]-'0');
+  if(str[0]=='-') for(int i=1;i<=l-1-3;++i) v=v*10+(str[i]-'0');
+  else for(int i=0;i<=l-1-3;++i) v=v*10+(str[i]-'0');
   v+=0.1*(str[l-1-1]-'0')+0.01*(str[l-1]-'0');
-  return v;
+  return str[0]=='-'?-v:v;
 }
 std::string int_to_string (int v) {
   char c[100]; //SPONGEBOB: VERY BAD
