@@ -196,13 +196,18 @@ float string_to_float (std::string str) { //保证小数点两位
   return str[0]=='-'?-v:v;
 }
 std::string int_to_string (int v) {
-  char c[100]; //SPONGEBOB: VERY BAD
+  char c[100]; 
   sprintf(c, "%d", v);
   return c;
 }
 std::string float_to_string (float v) { //保留两位小数
-  char c[100]; //SPONGEBOB: VERY BAD
+  char c[100]; 
   sprintf(c, "%.2f", v);
+  int len=strlen(c);
+  if(c[len-1]=='0') {
+    c[len-1]=c[len];
+    if(c[len-2]=='0') c[len-3]=c[len];
+  }
   return c;
 }
 
