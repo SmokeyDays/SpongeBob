@@ -82,7 +82,7 @@ void ParseStage::handle_event(StageEvent *event) {
 
   StageEvent *new_event = handle_request(event);
   if (nullptr == new_event) {
-    callback_event(event, nullptr);
+    callback_event(event, nullptr);//*
     event->done_immediate();
     return;
   }
@@ -112,7 +112,8 @@ void ParseStage::callback_event(StageEvent *event, CallbackContext *context) {
 StageEvent *ParseStage::handle_request(StageEvent *event) {
   SQLStageEvent *sql_event = static_cast<SQLStageEvent *>(event);
   const std::string &sql = sql_event->get_sql();
-  
+
+ //LOG_ERROR("HANDLE_REQUEST"); 
   
   Query *result = query_create();//分配一个 query 的空间
   if (nullptr == result) {
@@ -129,10 +130,14 @@ StageEvent *ParseStage::handle_request(StageEvent *event) {
     snprintf(response, sizeof(response), "Failed to parse sql: %s, error msg: %s\n", sql.c_str(), error);
     sql_event->session_event()->set_response(response);
     */
+  //LOG_ERROR("PARSE FAILED!"); 
+   // printf("PARSE FAILED!");
     sql_event->session_event()->set_response("FAILURE\n");
     query_destroy(result);
     return nullptr;
   }
+  //LOG_ERROR("PARSE SUCCESS!"); 
+  //printf("PARSE SUCCESS!");
 
-  return new ExecutionPlanEvent(sql_event, result);
+  return new ExecutionPlanEvent(sql_event, result); //合理怀疑这里传进去的参其实是没有被 parse 的
 }

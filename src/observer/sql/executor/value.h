@@ -27,6 +27,7 @@ public:
 
   virtual void to_string(std::ostream &os) const = 0;
   virtual int compare(const TupleValue &other) const = 0;
+  virtual std::string get_value_string() const = 0;
 private:
 };
 
@@ -38,7 +39,12 @@ public:
   void to_string(std::ostream &os) const override {
     os << value_;
   }
-
+  std::string get_value_string() const override {
+    char c[100]; //SPONGEBOB: VERY BAD
+    sprintf(c, "%d", value_);
+    return c; //应该会自动转成 std::string
+  }
+ 
   int compare(const TupleValue &other) const override {
     const IntValue & int_other = (const IntValue &)other;
     return value_ - int_other.value_;
@@ -55,6 +61,11 @@ public:
 
   void to_string(std::ostream &os) const override {
     os << value_;
+  }
+  std::string get_value_string() const override {
+    char c[100]; //SPONGEBOB: VERY BAD
+    sprintf(c, "%.2f", value_);
+    return c;
   }
 
   int compare(const TupleValue &other) const override {
@@ -81,6 +92,9 @@ public:
 
   void to_string(std::ostream &os) const override {
     os << value_;
+  }
+  std::string get_value_string() const override {
+    return value_.c_str();
   }
 
   int compare(const TupleValue &other) const override {

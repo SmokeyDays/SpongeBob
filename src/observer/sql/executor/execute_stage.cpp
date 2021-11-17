@@ -122,13 +122,14 @@ void ExecuteStage::handle_request(common::StageEvent *event) {
   exe_event->push_callback(cb);
 
   switch (sql->flag) {
-    case SCF_SELECT: { // select
+    case SCF_SELECT:
+    case SCF_SELECT_AGGRE: { // select
       do_select(current_db, sql, exe_event->sql_event()->session_event());
       exe_event->done_immediate();
     }
     break;
 
-    case SCF_INSERT:
+    case SCF_INSERT: //SPONGEBOB: "Here may be a very important part."
     case SCF_UPDATE:
     case SCF_DELETE:
     case SCF_CREATE_TABLE:
@@ -265,7 +266,8 @@ RC ExecuteStage::do_select(const char *db, Query *sql, SessionEvent *session_eve
     // TODO: 本次查询了多张表，需要做join操作
   } else {
     // 当前只查询一张表，直接返回结果即可
-    tuple_sets.front().print(ss);
+    if (sql->flag == SCF_SELECT) tuple_sets.front().print(ss);
+    else tuple_sets.front().print_aggregation(ss, selects); //SPONGEBOB:VERY IMPORTANT
   }
 
   for (SelectExeNode *& tmp_node: select_nodes) {

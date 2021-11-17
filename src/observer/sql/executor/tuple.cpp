@@ -182,6 +182,124 @@ void TupleSet::print(std::ostream &os) const {
   }
 }
 
+int string_to_int (std::string str) {
+  int v=0, l=str.length();
+  for(int i=l-1;i>=0;--i) v=v*10+str[i]-'0';
+  return v;
+}
+float string_to_float (std::string str) { //保证小数点两位
+  float v=0, l=str.length();
+  for(int i=l-1-3;i>=0;--i) v=v*10+(str[i]-'0');
+  v+=0.1*(str[l-1-1]-'0')+0.01*(str[l-1]-'0');
+  return v;
+}
+std::string int_to_string (int v) {
+  char c[100]; //SPONGEBOB: VERY BAD
+  sprintf(c, "%d", v);
+  return c;
+}
+std::string float_to_string (float v) { //保留两位小数
+  char c[100]; //SPONGEBOB: VERY BAD
+  sprintf(c, "%.2f", v);
+  return c;
+}
+void TupleSet::print_aggregation(std::ostream &os, const Selects &selects) const {
+  if (schema_.fields().empty()) {
+    LOG_WARN("Got empty schema");
+    return;
+  }
+
+  std::map<std::string, int>field_ids;
+  std::vector<std::string> field_names;
+  std::vector<AttrType> field_types;
+  int id=0;
+  for (const auto &field: schema_.fields()) {
+    field_names.push_back(field.field_name());
+    field_types.push_back(field.type());
+    field_ids[field.field_name()] = id++;
+  }
+
+  std::vector<std::string>field_content[20];//SPONGEBOB
+  for (const Tuple &item : tuples_) {
+    int cnt=0; //列数
+    const std::vector<std::shared_ptr<TupleValue>> &values = item.values();
+    for (std::vector<std::shared_ptr<TupleValue>>::const_iterator iter = values.begin(), end = values.end();
+          iter != end; ++iter, ++cnt) {
+      field_content[cnt].push_back((*iter)->get_value_string());
+    }
+  }
+
+  for (int i=selects.aggre_num - 1; i>=0; --i){
+    std::string field_name = selects.aggres[i].aggre_field_name;
+    AggreType aggre_type = selects.aggres[i].aggre_type;
+    int field_id = field_ids[field_name];
+    AttrType field_type = field_types[field_id];
+    switch (aggre_type){
+      case MAX: 
+      case MIN: {
+        switch (field_type) {
+          case INTS: {
+            int ans = string_to_int(field_content[field_id][0]);
+            for (auto v: field_content[field_id]) {
+              int vnow = string_to_int(v);
+              if (aggre_type == MIN ? (vnow < ans) : (vnow > ans)) ans = vnow;
+            }
+            os << int_to_string(ans);
+            break;
+          }
+          case CHARS: {
+            std::string ans = field_content[field_id][0];
+            for (auto v: field_content[field_id]) {
+              if (aggre_type == MIN ? (v < ans) : (v > ans)) ans = v;
+            }
+            os << ans;
+            break;
+          }
+          case DATES: {
+            std::string ans = field_content[field_id][0];
+            for (auto v: field_content[field_id]) {
+              if (aggre_type == MIN ? (v < ans) : (v > ans)) ans = v;
+            }
+            os << ans;
+            break;
+          }
+          case FLOATS: {
+            float ans = string_to_float(field_content[field_id][0]);
+            for (auto v: field_content[field_id]) {
+              float vnow = string_to_float(v);
+              if (aggre_type == MIN ? (vnow < ans) : (vnow > ans)) ans = vnow;
+            }
+            os << float_to_string(ans);
+            break;
+          }
+        }
+        break;
+      }
+      case COUNT: {
+        os << int_to_string(field_content[field_id].size());//SPONGEBOB: 没有 NULL
+        break;
+      }
+      case AVG: {
+        float avg = 0;
+        for (auto v: field_content[field_id]) {
+          avg += (field_type==INTS ? string_to_int(v) : string_to_float(v));
+        }
+        os << float_to_string(avg / field_content[field_id].size());
+        break;
+      }
+      default:
+        LOG_ERROR("SPONGEBOB!!!");
+    }
+    if (i!=0) os << " | ";
+  }
+  os << "\n";
+
+  field_ids.clear();
+  field_names.clear();
+  field_types.clear();
+  field_content->clear();//这个能直接用啊
+}
+
 void TupleSet::set_schema(const TupleSchema &schema) {
   schema_ = schema;
 }

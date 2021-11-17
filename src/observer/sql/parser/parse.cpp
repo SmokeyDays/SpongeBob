@@ -39,6 +39,22 @@ void relation_attr_destroy(RelAttr *relation_attr) {
   relation_attr->attribute_name = nullptr;
 }
 
+void aggre_init(Aggre *aggre, int aggre_num, const char* aggre_name){
+  AggreType a;
+  switch (aggre_num){
+    case 1: a = MAX; break;
+    case 2: a = MIN; break;
+    case 3: a = COUNT; break;
+    case 4: a = AVG; break;
+  }
+  aggre->aggre_type = a;
+  aggre->aggre_field_name = strdup(aggre_name);
+}
+void aggre_destroy(Aggre *aggre) {
+  aggre->aggre_type = AGGRE_UNDEFINED;
+  aggre->aggre_field_name = nullptr;
+}
+
 void value_init_integer(Value *value, int v) {
   value->type = INTS;
   value->data = malloc(sizeof(v));
@@ -83,6 +99,8 @@ void value_init_datestring(Value *value, const char *v){
   value->data = malloc(sizeof(date_num));
   memcpy(value->data, &date_num, sizeof(date_num));
 }
+
+
 void value_destroy(Value *value) {
   value->type = UNDEFINED;
   free(value->data);
@@ -137,6 +155,10 @@ void selects_append_relation(Selects *selects, const char *relation_name) {
   selects->relations[selects->relation_num++] = strdup(relation_name);
 }
 
+void selects_append_aggre(Selects *selects, Aggre *aggre) {
+  selects->aggres[selects->aggre_num++] = *aggre; //SpongeBob
+}
+
 void selects_append_conditions(Selects *selects, Condition conditions[], size_t condition_num) {
   assert(condition_num <= sizeof(selects->conditions)/sizeof(selects->conditions[0]));
   for (size_t i = 0; i < condition_num; i++) {
@@ -161,6 +183,10 @@ void selects_destroy(Selects *selects) {
     condition_destroy(&selects->conditions[i]);
   }
   selects->condition_num = 0;
+
+  for (size_t i = 0; i < selects->aggre_num; i++) {
+    aggre_destroy(&selects->aggres[i]);
+  }
 }
 
 void inserts_init(Inserts *inserts, const char *relation_name, Value values[], size_t value_num) {
@@ -324,7 +350,8 @@ Query *query_create() {
 
 void query_reset(Query *query) {
   switch (query->flag) {
-    case SCF_SELECT: {
+    case SCF_SELECT: 
+    case SCF_SELECT_AGGRE: {
       selects_destroy(&query->sstr.selection);
     }
     break;

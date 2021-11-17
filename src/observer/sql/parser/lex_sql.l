@@ -25,7 +25,7 @@ extern double atof();
 WHITE_SAPCE      [\ \t\b\f]
 DIGIT            [0-9]+
 
-ID               [A-Za-z_]+[A-Za-z0-9_]*
+ID               [A-Za-z_]+[A-Za-z0-9_]*  
 DOT              \.
 QUOTE            [\'\"]
 %x STR
@@ -41,6 +41,10 @@ QUOTE            [\'\"]
 ";"                 	 				           RETURN_TOKEN(SEMICOLON);
 {DOT}                 					         RETURN_TOKEN(DOT);
 "*"                   					         RETURN_TOKEN(STAR);
+[Mm][Aa][Xx]									RETURN_TOKEN(MAX_T);
+[Mm][Ii][Nn]									RETURN_TOKEN(MIN_T);
+[Cc][Oo][Uu][Nn][Tt]							RETURN_TOKEN(COUNT_T);
+[Aa][Vv][Gg]									RETURN_TOKEN(AVG_T);
 [Ee][Xx][Ii][Tt]						             RETURN_TOKEN(EXIT);
 [Hh][Ee][Ll][Pp]                    	   RETURN_TOKEN(HELP);
 [Dd][Ee][Ss][Cc]                         RETURN_TOKEN(DESC);
