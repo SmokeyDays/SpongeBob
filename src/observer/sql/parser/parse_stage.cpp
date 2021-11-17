@@ -137,20 +137,22 @@ StageEvent *ParseStage::handle_request(StageEvent *event) {
     return nullptr;
   }
 
-  const Selects &selects = result->sstr.selection;
-  if (selects.attr_num != selects.aggre_num) {
-    sql_event->session_event()->set_response("FAILURE\n");
-    query_destroy(result);
-    return nullptr;
-  }
-  for (int i=selects.aggre_num - 1; i>=0; --i) {
-    if (selects.aggres[i].aggre_type != COUNT && selects.aggres[i].aggre_field_name[0] == '*') {
+  if (result->flag == SCF_SELECT_AGGRE) {
+    const Selects &selects = result->sstr.selection;
+    if (selects.attr_num != selects.aggre_num) {
       sql_event->session_event()->set_response("FAILURE\n");
       query_destroy(result);
       return nullptr;
     }
-    //if (selects.attributes[i].)
-    //std::cout << (selects.aggres[i].aggre_type != COUNT) << ' ' << selects.aggres[i].aggre_field_name << std::endl;
+    for (int i=selects.aggre_num - 1; i>=0; --i) {
+      if (selects.aggres[i].aggre_type != COUNT && selects.aggres[i].aggre_field_name[0] == '*') {
+        sql_event->session_event()->set_response("FAILURE\n");
+        query_destroy(result);
+        return nullptr;
+      }
+      //if (selects.attributes[i].)
+      //std::cout << (selects.aggres[i].aggre_type != COUNT) << ' ' << selects.aggres[i].aggre_field_name << std::endl;
+    }
   }
 
   //LOG_ERROR("PARSE SUCCESS!"); 
