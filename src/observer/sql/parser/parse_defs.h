@@ -61,6 +61,13 @@ typedef struct _Condition {
   Value right_value;   // right-hand side value if right_is_attr = FALSE
 } Condition; //对这个属性名和属性值的转换有一些不解，先存疑
 
+
+typedef enum { AGGRE_UNDEFINED, MAX, MIN, COUNT, AVG } AggreType;
+typedef struct {
+  AggreType aggre_type;
+  char* aggre_field_name;
+} Aggre;
+
 // struct of select
 typedef struct {
   size_t    attr_num;               // Length of attrs in Select clause
@@ -69,6 +76,8 @@ typedef struct {
   char *    relations[MAX_NUM];     // relations in From clause
   size_t    condition_num;          // Length of conditions in Where clause
   Condition conditions[MAX_NUM];    // conditions in Where clause
+  Aggre     aggres[MAX_NUM];//SPONGEBOB
+  size_t    aggre_num; //which should be equal to attr_num
 } Selects; //一个完整的 select 语句：在若干个 relation 中选择若干个属性，满足若干个 condition
 
 // struct of insert
@@ -166,7 +175,8 @@ enum SqlCommandFlag {
   SCF_ROLLBACK,
   SCF_LOAD_DATA,
   SCF_HELP,
-  SCF_EXIT
+  SCF_EXIT,
+  SCF_SELECT_AGGRE
 }; 
 
 // struct of flag and sql_struct
@@ -181,6 +191,8 @@ extern "C" {
 
 void relation_attr_init(RelAttr *relation_attr, const char *relation_name, const char *attribute_name);
 void relation_attr_destroy(RelAttr *relation_attr);
+void aggre_init(Aggre *aggre, int aggre_num, const char* aggre_name);
+void aggre_destroy(Aggre *aggre);
 
 void value_init_integer(Value *value, int v);
 void value_init_float(Value *value, float v);
@@ -198,6 +210,7 @@ void attr_info_destroy(AttrInfo *attr_info);
 void selects_init(Selects *selects, ...);
 void selects_append_attribute(Selects *selects, RelAttr *rel_attr);
 void selects_append_relation(Selects *selects, const char *relation_name);
+void selects_append_aggre(Selects *selects, Aggre *aggre);
 void selects_append_conditions(Selects *selects, Condition conditions[], size_t condition_num);
 void selects_destroy(Selects *selects);
 

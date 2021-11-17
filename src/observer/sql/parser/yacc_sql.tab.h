@@ -96,23 +96,85 @@ extern int yydebug;
     GE = 297,                      /* GE  */
     NE = 298,                      /* NE  */
     DATE_T = 299,                  /* DATE_T  */
-    NUMBER = 300,                  /* NUMBER  */
-    FLOAT = 301,                   /* FLOAT  */
-    ID = 302,                      /* ID  */
-    PATH = 303,                    /* PATH  */
-    SSS = 304,                     /* SSS  */
-    STAR = 305,                    /* STAR  */
-    STRING_V = 306,                /* STRING_V  */
-    DATE_STRING = 307              /* DATE_STRING  */
+    MAX_T = 300,                   /* MAX_T  */
+    MIN_T = 301,                   /* MIN_T  */
+    AVG_T = 302,                   /* AVG_T  */
+    COUNT_T = 303,                 /* COUNT_T  */
+    NUMBER = 304,                  /* NUMBER  */
+    FLOAT = 305,                   /* FLOAT  */
+    ID = 306,                      /* ID  */
+    PATH = 307,                    /* PATH  */
+    SSS = 308,                     /* SSS  */
+    STAR = 309,                    /* STAR  */
+    STRING_V = 310,                /* STRING_V  */
+    DATE_STRING = 311              /* DATE_STRING  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
+/* Token kinds.  */
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
+#define SEMICOLON 258
+#define CREATE 259
+#define DROP 260
+#define TABLE 261
+#define TABLES 262
+#define INDEX 263
+#define SELECT 264
+#define DESC 265
+#define SHOW 266
+#define SYNC 267
+#define INSERT 268
+#define DELETE 269
+#define UPDATE 270
+#define LBRACE 271
+#define RBRACE 272
+#define COMMA 273
+#define TRX_BEGIN 274
+#define TRX_COMMIT 275
+#define TRX_ROLLBACK 276
+#define INT_T 277
+#define STRING_T 278
+#define FLOAT_T 279
+#define HELP 280
+#define EXIT 281
+#define DOT 282
+#define INTO 283
+#define VALUES 284
+#define FROM 285
+#define WHERE 286
+#define AND 287
+#define SET 288
+#define ON 289
+#define LOAD 290
+#define DATA 291
+#define INFILE 292
+#define EQ 293
+#define LT 294
+#define GT 295
+#define LE 296
+#define GE 297
+#define NE 298
+#define DATE_T 299
+#define MAX_T 300
+#define MIN_T 301
+#define AVG_T 302
+#define COUNT_T 303
+#define NUMBER 304
+#define FLOAT 305
+#define ID 306
+#define PATH 307
+#define SSS 308
+#define STAR 309
+#define STRING_V 310
+#define DATE_STRING 311
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 107 "yacc_sql.y"
+#line 111 "yacc_sql.y"
 
   struct _Attr *attr;
   struct _Condition *condition1;
@@ -122,7 +184,7 @@ union YYSTYPE
   float floats;
   char *position;
 
-#line 126 "yacc_sql.tab.h"
+#line 188 "yacc_sql.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

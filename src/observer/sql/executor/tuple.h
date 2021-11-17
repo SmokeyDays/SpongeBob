@@ -138,6 +138,7 @@ public:
   const std::vector<Tuple> &tuples() const;
 
   void print(std::ostream &os) const;
+  void print_aggregation(std::ostream &os, const Selects &selects) const;
 public:
   const TupleSchema &schema() const {
     return schema_;
