@@ -56,6 +56,10 @@ void Tuple::add(const char *s, int len) {
   add(new StringValue(s, len));
 }
 
+void Tuple::add(const Tuple &other) {
+  values_.insert(values_.begin(), other.values().begin(), other.values().end());
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 std::string TupleField::to_string() const {
@@ -155,6 +159,24 @@ TupleSet &TupleSet::operator=(TupleSet &&other) {
 
 void TupleSet::add(Tuple &&tuple) {
   tuples_.emplace_back(std::move(tuple));
+}
+
+void TupleSet::multiply(TupleSet &&tuple_set) {
+  schema_.append(tuple_set.get_schema());
+
+  std::vector<Tuple> tuples;
+  for(int i=0; i<tuples_.size(); ++i) {
+    for(int j=0; j<tuple_set.tuples().size(); ++j) {
+      Tuple tuple;
+      tuple.add(tuple_set.tuples()[j]);
+      tuple.add(tuples_[i]);
+      tuples.emplace_back(std::move(tuple));
+    }
+  }
+  tuples_.clear();
+  for(int i=0; i<tuples.size(); ++i) {
+    tuples_.emplace_back(std::move(tuples[i]));
+  }
 }
 
 void TupleSet::clear() {

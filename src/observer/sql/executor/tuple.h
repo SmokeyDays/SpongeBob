@@ -39,6 +39,7 @@ public:
   void add(int value);
   void add(float value);
   void add(const char *s, int len);
+  void add(const Tuple &other);
 
   const std::vector<std::shared_ptr<TupleValue>> &values() const {
     return values_;
@@ -129,6 +130,7 @@ public:
   const TupleSchema &get_schema() const;
 
   void add(Tuple && tuple);
+  void multiply(TupleSet && tuple_set);
 
   void clear();
 
