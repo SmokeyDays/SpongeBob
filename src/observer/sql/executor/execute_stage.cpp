@@ -264,8 +264,8 @@ RC ExecuteStage::do_select(const char *db, Query *sql, SessionEvent *session_eve
   std::stringstream ss;
   if (tuple_sets.size() > 1) {
     // TODO: 本次查询了多张表，需要做join操作
-    TupleSet &tuple_set = tuple_sets[0];
-    for(int i=1; i<tuple_sets.size(); ++i) {
+    TupleSet &tuple_set = tuple_sets.back();
+    for(int i = tuple_sets.size() - 2; i >= 0; --i) {
       tuple_set.multiply(std::move(tuple_sets[i]));
     }
     tuple_set.print(ss);
