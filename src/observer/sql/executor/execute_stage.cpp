@@ -261,18 +261,26 @@ RC ExecuteStage::do_select(const char *db, Query *sql, SessionEvent *session_eve
     }
   }
 
+  // TODO: 需要做join操作
+
   std::stringstream ss;
+  TupleSet &tuple_set = tuple_sets.back();
   if (tuple_sets.size() > 1) {
-    // TODO: 本次查询了多张表，需要做join操作
-    TupleSet &tuple_set = tuple_sets.back();
     for(int i = tuple_sets.size() - 2; i >= 0; --i) {
       tuple_set.multiply(std::move(tuple_sets[i]));
     }
+  }
+
+  rc = tuple_set.filter(db, selects);
+  if (RC::SUCCESS != rc) {
+    LOG_ERROR("Tuple Filter Failed");
+    return rc;
+  }
+
+  if (sql->flag == SCF_SELECT) {
     tuple_set.print(ss);
   } else {
-    // 当前只查询一张表，直接返回结果即可
-    if (sql->flag == SCF_SELECT) tuple_sets.front().print(ss);
-    else tuple_sets.front().print_aggregation(ss, selects); //SPONGEBOB:VERY IMPORTANT
+    tuple_sets.front().print_aggregation(ss, selects);//SPONGEBOB:VERY IMPORTANT
   }
 
   for (SelectExeNode *& tmp_node: select_nodes) {

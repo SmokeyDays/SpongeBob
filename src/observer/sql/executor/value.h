@@ -83,6 +83,8 @@ private:
   float value_;
 };
 
+// string of date.
+// snprintf(buf,sizeof(buf),"%04d-%02d-%02d",value/10000,    (value%10000)/100,value%100);
 class StringValue : public TupleValue {
 public:
   StringValue(const char *value, int len) : value_(value, len){

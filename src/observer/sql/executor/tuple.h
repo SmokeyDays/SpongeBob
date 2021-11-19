@@ -17,6 +17,7 @@ See the Mulan PSL v2 for more details. */
 
 #include <memory>
 #include <vector>
+#include <queue>
 
 #include "sql/parser/parse.h"
 #include "sql/executor/value.h"
@@ -115,6 +116,13 @@ private:
   std::vector<TupleField> fields_;
 };
 
+bool filterTuple(const char *db, const Condition & condition, const Tuple & tuple, const TupleSchema & tuple_schema);
+
+int string_to_int (std::string str);
+float string_to_float (std::string str);
+std::string int_to_string (int v);
+std::string float_to_string (float v);
+
 class TupleSet {
 public:
   TupleSet() = default;
@@ -131,6 +139,7 @@ public:
 
   void add(Tuple && tuple);
   void multiply(TupleSet && tuple_set);
+  RC filter(const char *db, const Selects & selects);
 
   void clear();
 

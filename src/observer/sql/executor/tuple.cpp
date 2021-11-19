@@ -14,6 +14,7 @@ See the Mulan PSL v2 for more details. */
 
 #include "sql/executor/tuple.h"
 #include "storage/common/table.h"
+#include "storage/default/default_handler.h"
 #include "common/log/log.h"
 
 Tuple::Tuple(const Tuple &other) {
@@ -177,6 +178,139 @@ void TupleSet::multiply(TupleSet &&tuple_set) {
   for(int i=0; i<tuples.size(); ++i) {
     tuples_.emplace_back(std::move(tuples[i]));
   }
+}
+
+TupleValue * tupleValueFactory(const Value &value) {
+  switch(value.type) {
+    case CHARS: {
+      
+    }
+    break;
+    case INTS: {
+
+    }
+    break;
+    case FLOATS: {
+
+    }
+    break;
+    case DATES: {
+
+    }
+    break;
+  }
+}
+
+bool filterTuple(const char *db, const Condition & condition, const Tuple & tuple, const TupleSchema & tuple_schema) {
+  const char *left_value = nullptr;
+  const char *right_value = nullptr;
+  if( condition.left_is_attr ) {
+    left_value = strdup(tuple.get(tuple_schema.index_of_field(condition.left_attr.relation_name, condition.left_attr.attribute_name)).get_value_string().c_str());
+  } else {
+    left_value = (char *)condition.left_value.data;
+  }
+  puts(left_value);
+  if( condition.right_is_attr ) {
+    right_value = strdup(tuple.get(tuple_schema.index_of_field(condition.right_attr.relation_name, condition.right_attr.attribute_name)).get_value_string().c_str());
+  } else {
+    right_value = (char *)condition.right_value.data;
+  }
+
+
+  AttrType type_left = UNDEFINED;
+  AttrType type_right = UNDEFINED;
+
+  if (1 == condition.left_is_attr) {
+    const FieldMeta *field_left = 
+      DefaultHandler::get_default().find_table(db, condition.left_attr.relation_name)->table_meta().field(condition.left_attr.attribute_name);
+    type_left = field_left->type();
+  } else {
+    type_left = condition.left_value.type;
+  }
+
+  if (1 == condition.right_is_attr) {
+    const FieldMeta *field_right = 
+      DefaultHandler::get_default().find_table(db, condition.right_attr.relation_name)->table_meta().field(condition.right_attr.attribute_name);
+    type_right = field_right->type();
+  } else {
+    type_right = condition.right_value.type;
+  }
+
+  int cmp_result = 0;
+  switch (type_left)
+  {
+    case DATES:
+    case CHARS: { // 字符串都是定长的，直接比较
+      // 按照C字符串风格来定
+      cmp_result = strcmp(left_value, right_value);
+    }
+    break;
+    case INTS: {
+      // 没有考虑大小端问题
+      // 对int和float，要考虑字节对齐问题,有些平台下直接转换可能会跪
+      int left = string_to_int(left_value);
+      int right = string_to_int(right_value);
+      cmp_result = left - right;
+    }
+    break;
+    break;
+    case FLOATS: {
+      float left = string_to_float(left_value);
+      float right = string_to_float(right_value);
+      cmp_result = (int)(left - right);
+    }
+    break;
+    default: {}
+  }
+  switch (condition.comp)
+  {
+  case EQUAL_TO:
+    return 0 == cmp_result;
+  case LESS_EQUAL:
+    return cmp_result <= 0;
+  case NOT_EQUAL:
+    return cmp_result != 0;
+  case LESS_THAN:
+    return cmp_result < 0;
+  case GREAT_EQUAL:
+    return cmp_result >= 0;
+  case GREAT_THAN:
+    return cmp_result > 0;
+
+  default:
+    break;
+  }
+
+  LOG_PANIC("Never should print this.");
+  return cmp_result;
+}
+
+RC TupleSet::filter(const char *db, const Selects & select) {
+  // printf("Tuple size before filter: %d\n",tuples_.size());
+  std::queue<int> to_delete;
+  for(int i = select.condition_num - 1; i >= 0; --i) {
+    // printf("Check condition %d\n",i);
+    if( ( !select.conditions[i].left_is_attr || !select.conditions[i].left_is_attr ) ||
+      (select.conditions[i].left_is_attr && (-1 == schema_.index_of_field(select.conditions[i].left_attr.relation_name, select.conditions[i].left_attr.attribute_name))) ||
+      (select.conditions[i].right_is_attr && (-1 == schema_.index_of_field(select.conditions[i].right_attr.relation_name, select.conditions[i].right_attr.attribute_name)))
+    ){
+      continue;
+    }
+    for(int j = tuples_.size() - 1; j >= 0; --j) {
+      // printf("Check Tuple: %d\n",j);
+      if(!filterTuple(db, select.conditions[i], tuples_[j], schema_)){
+        to_delete.push(j);
+      }
+    }
+    while(!to_delete.empty()){
+      // printf("Tuple size before erase: %d, erase: %d\n",tuples_.size(), to_delete.front());
+      tuples_.erase(tuples_.begin() + to_delete.front());
+      // printf("Tuple size after erase: %d\n",tuples_.size());
+      to_delete.pop();
+    }
+  }
+  // printf("Tuple size after filter: %d\n",tuples_.size());
+  return RC::SUCCESS;
 }
 
 void TupleSet::clear() {
