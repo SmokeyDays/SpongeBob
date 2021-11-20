@@ -278,7 +278,7 @@ RC ExecuteStage::do_select(const char *db, Query *sql, SessionEvent *session_eve
   }
 
   if (sql->flag == SCF_SELECT) {
-    tuple_set.print(ss);
+    tuple_set.print(ss, selects.attr_num);
   } else {
     tuple_sets.front().print_aggregation(ss, selects);//SPONGEBOB:VERY IMPORTANT
   }

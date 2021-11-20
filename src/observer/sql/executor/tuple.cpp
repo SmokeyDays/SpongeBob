@@ -113,7 +113,7 @@ int TupleSchema::index_of_field(const char *table_name, const char *field_name) 
   return -1;
 }
 
-void TupleSchema::print(std::ostream &os) const {
+void TupleSchema::print(std::ostream &os, int table_num) const {
   if (fields_.empty()) {
     os << "No schema";
     return;
@@ -127,13 +127,13 @@ void TupleSchema::print(std::ostream &os) const {
 
   for (std::vector<TupleField>::const_iterator iter = fields_.begin(), end = --fields_.end();
        iter != end; ++iter) {
-    if (table_names.size() > 1) {
+    if (table_num > 1) {
       os << iter->table_name() << ".";
     }
     os << iter->field_name() << " | ";
   }
 
-  if (table_names.size() > 1) {
+  if (table_num > 1) {
     os << fields_.back().table_name() << ".";
   }
   os << fields_.back().field_name() << std::endl;
@@ -290,7 +290,7 @@ RC TupleSet::filter(const char *db, const Selects & select) {
   std::queue<int> to_delete;
   for(int i = select.condition_num - 1; i >= 0; --i) {
     // printf("Check condition %d\n",i);
-    if( ( !select.conditions[i].left_is_attr || !select.conditions[i].left_is_attr ) ||
+    if( ( 0 == select.conditions[i].left_is_attr || 0 == select.conditions[i].right_is_attr ) ||
       (select.conditions[i].left_is_attr && (-1 == schema_.index_of_field(select.conditions[i].left_attr.relation_name, select.conditions[i].left_attr.attribute_name))) ||
       (select.conditions[i].right_is_attr && (-1 == schema_.index_of_field(select.conditions[i].right_attr.relation_name, select.conditions[i].right_attr.attribute_name)))
     ){
@@ -318,13 +318,13 @@ void TupleSet::clear() {
   schema_.clear();
 }
 
-void TupleSet::print(std::ostream &os) const {
+void TupleSet::print(std::ostream &os, int table_num) const {
   if (schema_.fields().empty()) {
     LOG_WARN("Got empty schema");
     return;
   }
 
-  schema_.print(os);
+  schema_.print(os, table_num);
 
   for (const Tuple &item : tuples_) {
     const std::vector<std::shared_ptr<TupleValue>> &values = item.values();

@@ -109,7 +109,7 @@ public:
     fields_.clear();
   }
 
-  void print(std::ostream &os) const;
+  void print(std::ostream &os, int table_num) const;
 public:
   static void from_table(const Table *table, TupleSchema &schema);
 private:
@@ -148,7 +148,7 @@ public:
   const Tuple &get(int index) const;
   const std::vector<Tuple> &tuples() const;
 
-  void print(std::ostream &os) const;
+  void print(std::ostream &os, int table_num) const;
   void print_aggregation(std::ostream &os, const Selects &selects) const;
 public:
   const TupleSchema &schema() const {
