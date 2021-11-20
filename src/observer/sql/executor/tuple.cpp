@@ -124,16 +124,16 @@ void TupleSchema::print(std::ostream &os, int table_num) const {
   for (const auto &field: fields_) {
     table_names.insert(field.table_name());
   }
-
+  printf("Print Table Num: %d, %d\n", table_num, table_names.size());
   for (std::vector<TupleField>::const_iterator iter = fields_.begin(), end = --fields_.end();
        iter != end; ++iter) {
-    if (table_num > 1) {
+    if (table_names.size() > 1) {
       os << iter->table_name() << ".";
     }
     os << iter->field_name() << " | ";
   }
 
-  if (table_num > 1) {
+  if (table_names.size() > 1) {
     os << fields_.back().table_name() << ".";
   }
   os << fields_.back().field_name() << std::endl;
