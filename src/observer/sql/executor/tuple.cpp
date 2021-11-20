@@ -127,13 +127,13 @@ void TupleSchema::print(std::ostream &os, int table_num) const {
   printf("Print Table Num: %d, %d\n", table_num, table_names.size());
   for (std::vector<TupleField>::const_iterator iter = fields_.begin(), end = --fields_.end();
        iter != end; ++iter) {
-    if (table_names.size() > 1) {
+    if (table_num > 1) {
       os << iter->table_name() << ".";
     }
     os << iter->field_name() << " | ";
   }
 
-  if (table_names.size() > 1) {
+  if (table_num > 1) {
     os << fields_.back().table_name() << ".";
   }
   os << fields_.back().field_name() << std::endl;
@@ -309,7 +309,7 @@ RC TupleSet::filter(const char *db, const Selects & select) {
       to_delete.pop();
     }
   }
-  // printf("Tuple size after filter: %d\n",tuples_.size());
+  printf("Tuple size after filter: %d\n",tuples_.size());
   return RC::SUCCESS;
 }
 
